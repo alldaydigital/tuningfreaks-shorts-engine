@@ -9,6 +9,7 @@ COPY bundle /bundle
 
 RUN cat /bundle/part* | base64 -d > /tmp/source.zip \
     && python -m zipfile -e /tmp/source.zip /app \
+    && python -c "from pathlib import Path; p=Path('/app/app.py'); s=p.read_text(); s=s.replace('templates.TemplateResponse(\"login.html\", {\"request\": request, \"error\": \"\"})','templates.TemplateResponse(request=request, name=\"login.html\", context={\"error\": \"\"})'); s=s.replace('templates.TemplateResponse(\"login.html\", {\"request\": request, \"error\": \"Onjuiste gebruikersnaam of wachtwoord.\"}, status_code=401)','templates.TemplateResponse(request=request, name=\"login.html\", context={\"error\": \"Onjuiste gebruikersnaam of wachtwoord.\"}, status_code=401)'); s=s.replace('templates.TemplateResponse(\"index.html\", {\"request\": request, \"version\": \"3.0 Mobile\"})','templates.TemplateResponse(request=request, name=\"index.html\", context={\"version\": \"3.0 Mobile\"})'); p.write_text(s)" \
     && rm -rf /tmp/source.zip /bundle \
     && pip install --no-cache-dir -r /app/requirements.txt
 
